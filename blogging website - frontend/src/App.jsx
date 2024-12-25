@@ -7,6 +7,7 @@ import { lookInSession } from "./common/session";
 
 export const UserContext = createContext({});
 
+
 const App = () => {
   const [userAuth, setUserAuth] = useState({});
 
