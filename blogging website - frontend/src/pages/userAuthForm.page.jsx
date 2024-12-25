@@ -14,11 +14,15 @@ const UserAuthForm = ({ type }) => {
     setUserAuth,
   } = useContext(UserContext);
 
+<<<<<<< HEAD
   const userAuthThroughServer = (serverRoute, fromData) => {
     axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, fromData)
       .then(({ data }) => {
         storeInSession("user", JSON.stringify(data));
+=======
+    let { userAuth : { access_token }, setUserAuth} = useContext(UserContext);
+>>>>>>> cb244feda98800826b02664b14407e547b0a0e8d
 
         setUserAuth(data);
       })
