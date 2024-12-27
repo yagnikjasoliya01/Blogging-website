@@ -8,7 +8,7 @@ const UserNavigationPanel = () => {
   const { userAuth : { username }, setUserAuth} = useContext(UserContext);
 
   const signOutUser = () => {
-    removeFromSession("user");
+    removeFromSession("user");``
     setUserAuth({ access_token: null });
   }
 
