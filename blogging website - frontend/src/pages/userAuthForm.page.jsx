@@ -14,32 +14,27 @@ const UserAuthForm = ({ type }) => {
     setUserAuth,
   } = useContext(UserContext);
 
-<<<<<<< HEAD
-  const userAuthThroughServer = (serverRoute, fromData) => {
+  const userAuthThroughServer = (serverRoute, formData) => {
     axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, fromData)
+      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
       .then(({ data }) => {
         storeInSession("user", JSON.stringify(data));
-=======
-    let { userAuth : { access_token }, setUserAuth} = useContext(UserContext);
->>>>>>> cb244feda98800826b02664b14407e547b0a0e8d
-
         setUserAuth(data);
       })
       .catch(({ response }) => {
-        toast.error(response.data.error);
+        toast.error(response?.data?.error || "Something went wrong");
       });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    let serverRoute = type == "sign-in" ? "/signin" : "/signup";
+    let serverRoute = type === "sign-in" ? "/signin" : "/signup";
 
-    let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
+    let emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/; // regex for email
     let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
-    //formData
+    // Form Data
     let form = new FormData(formElement);
     let formData = {};
 
@@ -49,11 +44,9 @@ const UserAuthForm = ({ type }) => {
 
     let { fullname, email, password } = formData;
 
-    //form validation
-    if (fullname) {
-      if (fullname.length < 3) {
-        return toast.error("Fullname must be atleast 3 letters long");
-      }
+    // Form Validation
+    if (fullname && fullname.length < 3) {
+      return toast.error("Fullname must be at least 3 letters long");
     }
     if (!email.length) {
       return toast.error("Enter Email");
@@ -63,7 +56,7 @@ const UserAuthForm = ({ type }) => {
     }
     if (!passwordRegex.test(password)) {
       return toast.error(
-        "password should be 6 to 20 character long with numeric, 1 lowercase and 1 uppercase letters"
+        "Password should be 6 to 20 characters long with numeric, 1 lowercase, and 1 uppercase letter"
       );
     }
 
@@ -76,19 +69,21 @@ const UserAuthForm = ({ type }) => {
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center ">
         <Toaster />
-        <form id="formElement" className="w-[80%] max-w-[400px]">
+        <form
+          id="formElement"
+          className="w-[80%] max-w-[400px]"
+          onSubmit={handleSubmit}
+        >
           <h1 className="text-4xl font-gelasio capitalize text-center mb-24">
-            {type == "sign-in" ? "Welcome Back" : "Join us today"}
+            {type === "sign-in" ? "Welcome Back" : "Join us today"}
           </h1>
-          {type != "sign-in" ? (
+          {type !== "sign-in" && (
             <InputBox
               name="fullname"
               type="text"
               placeholder="Full Name"
               icon="fi-rr-user"
             />
-          ) : (
-            ""
           )}
           <InputBox
             name="email"
@@ -103,11 +98,7 @@ const UserAuthForm = ({ type }) => {
             icon="fi-rr-key"
           />
 
-          <button
-            className="btn-dark center mt-14"
-            type="submit"
-            onClick={handleSubmit}
-          >
+          <button className="btn-dark center mt-14" type="submit">
             {type.replace("-", " ")}
           </button>
 
@@ -117,12 +108,12 @@ const UserAuthForm = ({ type }) => {
             <hr className="w-1/2 border-black" />
           </div>
 
-          <button className="btn-dark flex items-center justify-center gap-4 w-[90%]  center">
+          <button className="btn-dark flex items-center justify-center gap-4 w-[90%] center">
             <img src={googleicon} alt="icon of google" className="w-5" />
-            contine with google
+            Continue with Google
           </button>
 
-          {type == "sign-in" ? (
+          {type === "sign-in" ? (
             <p className="mt-6 text-dark-grey text-xl text-center">
               Don't have an account?
               <Link to="/signup" className="underline text-black text-xl ml-1">
@@ -131,7 +122,7 @@ const UserAuthForm = ({ type }) => {
             </p>
           ) : (
             <p className="mt-6 text-dark-grey text-xl text-center">
-              Already a member
+              Already a member?
               <Link to="/signin" className="underline text-black text-xl ml-1">
                 Sign in here.
               </Link>
