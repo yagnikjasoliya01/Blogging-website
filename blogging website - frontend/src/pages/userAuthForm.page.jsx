@@ -15,28 +15,17 @@ const UserAuthForm = ({ type }) => {
     setUserAuth,
   } = useContext(UserContext);
 
-  // const userAuthThroughServer = (serverRoute, fromData) => {
-  //   axios
-  //     .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, fromData)
-  //     .then(({ data }) => {
-  //       storeInSession("user", JSON.stringify(data));
-
-  //       setUserAuth(data);
-  //     })
-  //     .catch(({ response }) => {
-  //       toast.error(response.data.error);
-  //     });
-  // };
-  const userAuthThroughServer = async (serverRoute, formData) => {
-    try {
-      const { data } = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}${serverRoute}`, formData);
-      storeInSession('user', JSON.stringify(data));
-      setUserAuth(data);
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'An error occurred. Try again.');
-    }
+  const userAuthThroughServer = (serverRoute, formData) => {
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
+      .then(({ data }) => {
+        storeInSession("user", JSON.stringify(data));
+        setUserAuth(data);
+      })
+      .catch(({ response }) => {
+        toast.error(response?.data?.error || "Something went wrong");
+      });
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,7 +35,7 @@ const UserAuthForm = ({ type }) => {
     let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
     let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
-    //formData
+    // Form Data
     let form = new FormData(formElement);
     let formData = {};
 
@@ -70,31 +59,12 @@ const UserAuthForm = ({ type }) => {
     }
     if (!passwordRegex.test(password)) {
       return toast.error(
-        "password should be 6 to 20 character long with numeric, 1 lowercase and 1 uppercase letters"
+        "Password should be 6 to 20 characters long with numeric, 1 lowercase, and 1 uppercase letter"
       );
     }
 
     userAuthThroughServer(serverRoute, formData);
   };
-
-  const handleGoogleAuth = (e) => {
-    e.preventDefault();
-    
-    authWithGoogle().then(user => {
-      let serverRoute = "/google-auth"
-
-      let formData = {
-        access_token: user.access_token
-      }
-
-      userAuthThroughServer(serverRoute, formData);
-
-    })
-    .catch(err => {
-      toast.error('Trouble login through google');
-      return console.log(err);
-    })
-  }
 
   return access_token ? (
     <Navigate to="/" />
@@ -102,7 +72,11 @@ const UserAuthForm = ({ type }) => {
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center ">
         <Toaster />
-        <form id="formElement" className="w-[80%] max-w-[400px]">
+        <form
+          id="formElement"
+          className="w-[80%] max-w-[400px]"
+          onSubmit={handleSubmit}
+        >
           <h1 className="text-4xl font-gelasio capitalize text-center mb-24">
             {type == "sign-in" ? "Welcome Back" : "Join us today"}
           </h1>
@@ -143,9 +117,7 @@ const UserAuthForm = ({ type }) => {
             <hr className="w-1/2 border-black" />
           </div>
 
-          <button className="btn-dark flex items-center justify-center gap-4 w-[90%]  center"
-            onClick={handleGoogleAuth}
-          >
+          <button className="btn-dark flex items-center justify-center gap-4 w-[90%] center">
             <img src={googleicon} alt="icon of google" className="w-5" />
             contine with google
           </button>
