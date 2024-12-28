@@ -37,16 +37,18 @@ const UserAuthForm = ({ type }) => {
   //   }
   // };
 
+  const formRef = useRef();
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     let serverRoute = type == "sign-in" ? "/signin" : "/signup";
 
     let emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/; // regex for email
-    let passwordRegex = /^(?=.\d)(?=.[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
+    let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
     //formData
-    let form = new FormData(formElement);
+    let form = new FormData(formRef.current);
     let formData = {};
 
     for (let [key, value] of form.entries()) {
@@ -68,7 +70,9 @@ const UserAuthForm = ({ type }) => {
       return toast.error("Email is invalid");
     }
     if (!passwordRegex.test(password)) {
-      return toast.error("Password should be 6 to 20 character long with numeric, 1 lowercase and 1 uppercase letters");
+      return toast.error(
+        "Password should be 6 to 20 character long with numeric, 1 lowercase and 1 uppercase letters"
+      );
     }
 
     userAuthThroughServer(serverRoute, formData);
@@ -78,18 +82,24 @@ const UserAuthForm = ({ type }) => {
     e.preventDefault();
 
     authWithGoogle()
-      .then(user => {
-        let serverRoute = "/google-auth";
+      .then(async (user) => {
+        if (!user) throw new Error("User not authenticated");
 
-        let formData = {
-          access_token: user.accessToken,
-        };
+        const serverRoute = "/google-auth";
+        const formData = { access_token: user.accessToken };
 
-        userAuthThroughServer(serverRoute, formData);
+        try {
+          await userAuthThroughServer(serverRoute, formData);
+        } catch (serverError) {
+          toast.error("Server authentication failed. Please try again.");
+          console.error("Server Auth Error:", serverError);
+        }
       })
       .catch((err) => {
-        toast.error("Trouble login through google");
-        return console.log(err);
+        toast.error(
+          "Trouble logging in through Google. Please try again later."
+        );
+        console.error("Google Login Error:", err);
       });
   };
 
@@ -99,7 +109,7 @@ const UserAuthForm = ({ type }) => {
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center ">
         <Toaster />
-        <form id="formElement" className="w-[80%] max-w-[400px]">
+        <form id="formElement" ref={formRef} className="w-[80%] max-w-[400px]">
           <h1 className="text-4xl font-gelasio capitalize text-center mb-24">
             {type == "sign-in" ? "Welcome Back" : "Join us today"}
           </h1>
@@ -141,6 +151,7 @@ const UserAuthForm = ({ type }) => {
           </div>
 
           <button
+            type="button"
             className="btn-dark flex items-center justify-center gap-4 w-[90%]  center"
             onClick={handleGoogleAuth}
           >
